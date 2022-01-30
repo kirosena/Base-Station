@@ -1,0 +1,247 @@
+<html>
+
+<head>
+
+  <!-- ROS source-->
+  <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+  <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+  <!--Bootstrap source-->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+  <!-- Vue source -->
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  
+</head>
+<style>
+ body{
+   background-image: url('imagess.jpg');
+ }
+</style>
+
+<body>
+
+  <div id="app" class="container">
+    <div class="jumbotron">
+      <h1>KIRO_SENA_INTERFACE</h1>
+    </div>
+
+    <div class="row" style="max-height: 200px;">
+      <div class="col-md-6">
+        <h3>Connection status</h3>
+
+        <p class="text-success" v-if="connected">Connected!</p>
+        <p class="text-danger" v-else>Not connected!</p>
+
+        <label>Websocket server address</label>
+        <input type="text" v-model="ws_address" />
+        <br><br>
+
+        <button :disabled="loading" @click="disconnect" class="btn btn-danger" v-if="connected">Disconnect</button>
+        <button :disabled="loading" @click="connect" class="btn btn-success" v-else>Connect!</button>
+
+      </div>
+
+
+      <div class="col-md-6" style="max-height: 200px; overflow: auto;">
+        <h3>Log messages</h3>
+        <div>
+          <p v-for='log in logs'>
+            {{ log }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+
+
+    <!--Commands Joystick-->
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <h5>Commands Joystick</h5>
+      </div>
+
+      <!--1st row -->
+      <div class="col-md-12 text-center">
+        <button v-on:click="goForward" :disabled="loading || !connected" class="btn btn-primary">Go forward</button>
+        <br><br>
+      </div>
+
+      <!-- 2nd row-->
+      <div class="col-md-4 text-center">
+        <button @click="turnLeft" :disabled="loading || !connected" class="btn btn-primary">Turn left</button>
+      </div>
+
+      <div class="col-md-4 text-center">
+        <button @click="stop" :disabled="loading || !connected" class="btn btn-danger">Stop</button>
+        <br><br>
+      </div>
+
+      <div class="col-md-4 text-center">
+        <button @click="turnRight" :disabled="loading || !connected" class="btn btn-primary">turnRight</button>
+      </div>
+
+
+      <!-- 3rd row-->
+      <div class="col-md-12 text-center">
+        <button @click="backward" :disabled="loading || !connected" class="btn btn-primary">Go backward</button>
+      </div>
+
+    </div>
+
+    <hr>
+
+
+
+    <!--  Tombol control -->
+    <div class="container" style="text-align: center; padding-top: 20px;">
+      <h5>Control Mode</h5>
+    </div>
+
+    <!-- MODE1 -->
+    <!--menampilkan printah mode 1-->
+    <div class="control" style="display: flex; text-align: center; padding-left: 20%; ">
+      <div class="card" style="width: 25%; border: 1px solid; ">
+        <div class="card-header" style="font-size: 20px; font-weight: bold;background-color: #0081ae ">
+          MODE 1
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-4 d-md-block">
+            <button v-on:click="goForward" :disabled="loading || !connected" class="btn btn-primary" type="button" onchange="mode1 (this.checked)">Mode 1</button>
+          </div>
+        </div>
+      </div>
+      <!--akhir perintah mode 1-->
+
+
+      <!-- MODE2 -->
+      <!--menampilkan printah mode 2-->
+      <div class="card" style="width: 25%; border: 1px solid; ">
+        <div class="card-header" style="font-size: 20px; font-weight: bold;background-color: #0081ae ">
+          MODE 2
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-4 d-md-block">
+            <button :disabled="loading || !connected" class="btn btn-primary" type="button">Mode 2</button>
+          </div>
+        </div>
+      </div>
+      <!--akhir perintah mode 2-->
+
+
+      <!-- MODE3 -->
+      <!--menampilkan printah mode 3-->
+      <div class="card" style="width: 25%; border: 1px solid; ">
+        <div class="card-header" style="font-size: 20px; font-weight: bold;background-color: #0081ae ">
+          MODE 3
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-4 d-md-block">
+            <button :disabled="loading || !connected" class="btn btn-primary" type="button">Mode 3</button>
+          </div>
+        </div>
+      </div>
+      <!--akhir perintah mode 3-->
+    </div>
+
+
+    <!-- START -->
+    <!--Menampilkan printah mode start-->
+    <div style="display: flex; text-align: center; padding-left: 30%; padding-top: 1%">
+      <div class="card" style="width: 25%; border: 1px solid; ">
+        <div class="card-header" style="font-size: 20px; font-weight: bold;background-color:#3eae00">
+          START
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-4 d-md-block">
+            <button :disabled="loading || !connected" class="btn btn-primary" type="button">Start</button>
+          </div>
+        </div>
+      </div>
+      <!--akhir perintah mode start-->
+
+
+      <!-- STOP -->
+      <!--menampilkan printah mode stop-->
+      <div class="card" style="width: 25%; border: 1px solid; ">
+        <div class="card-header" style="font-size: 20px; font-weight: bold;background-color: #ae0000 ">
+          RESET
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-4 d-md-block">
+            <button :disabled="loading || !connected" class="btn btn-primary" type="button">Reset</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!--akhir perintah mode stop-->
+
+    <!-- Akhir Tombol control -->
+
+
+    <hr>
+
+   <div class="container" style="text-align: center; margin-top: 100px; padding-top: 1%;">
+       
+      <h2>Monitoring MultiSensor RealTime</h2>
+
+      <div style="display: flex;">
+     <!-- DISPLAY SENSOR 1 -->
+     <!-- menampilkan nilai sensor Robot 1 -->
+      <div class="card" style="width: 33.33%; border: 1px solid; ">
+        <div class="card-header" style="font-size: 20px; font-weight: bold; background-color:#3eae00">
+          Sensor Robot1
+        </div>
+          <div class="card-body">
+          <h1>   <span id="SensorRobot1"> 0 </span>   </h1>
+        </div>
+      </div>
+      <!--Akhir menampilkan nilai sensor Robot 1 -->
+      
+     <!-- DISPLAY SENSOR 2 -->
+     <!-- menampilkan nilai sensor Robot 2 -->
+      <div class="card" style="width: 33.33%; border: 1px solid;" >
+        <div class="card-header" style="font-size: 20px; font-weight: bold; background-color: #00ae9e;">
+          Sensor Robot2 
+        </div>
+          <div class="card-body">
+          <h1> <span id="SensorRbot2"> 0 </span> </h1>
+        </div>
+      </div>
+      <!--Akhir menampilkan nilai sensor Robot 2 -->
+
+      <!-- DISPLAY RESET -->
+     <!-- menampilkan button reset -->
+      <div class="card" style="width: 33.33%; border: 1px solid;">
+        <div class="card-header" style="font-size: 20px; font-weight: bold; background-color:#FB380E; ">
+          Reset Niliai Sensor
+        </div>
+          <div class="card-body">
+         <button :disabled="loading || !connected" class="btn btn-primary" type="button">Reset</button>
+        </div>
+      </div>
+      <!--Akhir menampilkan button RESET -->
+    </div>
+
+  
+  </div>
+
+
+  <!--Bootstrap source-->
+  <!-- JS, Popper.js, and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+  <script type="text/javascript" src="main.js">
+  </script>
+
+</body>
+
+</html>
